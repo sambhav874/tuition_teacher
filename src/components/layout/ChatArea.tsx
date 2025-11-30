@@ -1,14 +1,19 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Send, Image as ImageIcon, Paperclip, Loader2, Sparkles, Mic } from "lucide-react";
+import { Send, Image as ImageIcon, Paperclip, Loader2, Sparkles, Mic, Menu } from "lucide-react";
 import { cn, compressImage } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { generateAIResponse } from "@/lib/ai-service";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { useState, useRef, useEffect } from "react";
 
-export function ChatArea({ className }: { className?: string }) {
+interface ChatAreaProps {
+    className?: string;
+    onOpenSidebar?: () => void;
+}
+
+export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
     const { sessions, currentSessionId, createSession, addMessage } = useStore();
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -133,21 +138,37 @@ export function ChatArea({ className }: { className?: string }) {
     };
 
     return (
-        <div className={cn("flex h-full flex-col bg-background relative", className)}>
+        <div className={cn("flex h-full flex-col bg-transparent relative", className)}>
+            {/* Mobile Header */}
+            <div className="md:hidden flex items-center justify-between p-4 border-b border-emerald-900/20 bg-black/20 backdrop-blur-sm">
+                <button
+                    onClick={onOpenSidebar}
+                    className="text-emerald-500/60 hover:text-emerald-400 transition-colors"
+                >
+                    <Menu className="h-5 w-5" />
+                </button>
+                <div className="text-[10px] tracking-[0.2em] font-mono text-emerald-500/40 uppercase">
+                    Tuition Teacher
+                </div>
+                <div className="w-5" /> {/* Spacer for centering */}
+            </div>
             {/* Messages Area */}
             <div className="flex-1 overflow-auto p-4 sm:p-8">
                 <div className="mx-auto max-w-3xl space-y-8">
                     {!currentSession || currentSession.messages.length === 0 ? (
                         /* Welcome Message */
-                        <div className="flex flex-col items-center justify-center space-y-6 py-20 text-center animate-in fade-in duration-700">
-                            <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-neutral-900 border border-white/10 shadow-2xl">
-                                <Sparkles className="h-8 w-8 text-white" />
-                                <div className="absolute inset-0 rounded-full bg-white/5 blur-xl" />
+                        <div className="flex flex-col items-center justify-center space-y-8 py-20 text-center animate-in fade-in duration-700">
+                            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-black/50 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)] biolum-box">
+                                <Sparkles className="h-8 w-8 text-emerald-400" />
+                                <div className="absolute inset-0 rounded-full bg-emerald-500/5 blur-xl" />
                             </div>
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-semibold tracking-tight text-white">Hello, Student.</h2>
-                                <p className="max-w-md text-neutral-400 font-light">
-                                    I am your AI Tutor. Upload a problem or ask a question to begin learning.
+                            <div className="space-y-4">
+                                <h2 className="text-4xl md:text-5xl font-garamond font-light tracking-tight text-emerald-100 biolum-text">
+                                    Greetings, Scholar.
+                                </h2>
+                                <p className="max-w-md mx-auto text-emerald-500/50 font-mono text-xs tracking-widest uppercase leading-loose">
+                                    I am your guide through the academic abyss. <br />
+                                    Upload a problem or inquire to begin.
                                 </p>
                             </div>
                         </div>
@@ -159,10 +180,10 @@ export function ChatArea({ className }: { className?: string }) {
                     )}
 
                     {isLoading && (
-                        <div className="flex items-center gap-3 text-neutral-500 animate-pulse pl-4">
-                            <div className="h-2 w-2 rounded-full bg-neutral-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-                            <div className="h-2 w-2 rounded-full bg-neutral-500 animate-bounce" style={{ animationDelay: "150ms" }} />
-                            <div className="h-2 w-2 rounded-full bg-neutral-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+                        <div className="flex items-center gap-3 text-emerald-500/50 animate-pulse pl-4">
+                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "300ms" }} />
                         </div>
                     )}
                     <div ref={messagesEndRef} className="h-4" />
@@ -170,15 +191,15 @@ export function ChatArea({ className }: { className?: string }) {
             </div>
 
             {/* Input Area */}
-            <div className="p-6 pb-8">
+            <div className="p-4 sm:p-6 pb-6 sm:pb-8">
                 <div className="mx-auto max-w-3xl">
                     {/* Image Preview */}
                     {selectedImage && (
                         <div className="mb-4 relative inline-block animate-in fade-in zoom-in duration-300">
-                            <img src={selectedImage} alt="Preview" className="h-24 w-24 rounded-2xl object-cover border border-white/10 shadow-lg" />
+                            <img src={selectedImage} alt="Preview" className="h-24 w-24 rounded-sm object-cover border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]" />
                             <button
                                 onClick={() => setSelectedImage(null)}
-                                className="absolute -top-2 -right-2 bg-neutral-900 text-white rounded-full p-1.5 shadow-md border border-white/10 hover:bg-neutral-800 transition-colors"
+                                className="absolute -top-2 -right-2 bg-black text-emerald-500 rounded-full p-1.5 shadow-md border border-emerald-500/30 hover:bg-emerald-900/40 transition-colors"
                             >
                                 <span className="sr-only">Remove</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -186,7 +207,7 @@ export function ChatArea({ className }: { className?: string }) {
                         </div>
                     )}
 
-                    <div className="relative flex items-end gap-3 rounded-[28px] border border-white/10 bg-neutral-900/50 p-2 shadow-2xl backdrop-blur-xl transition-all focus-within:border-white/20 focus-within:bg-neutral-900/80">
+                    <div className="relative flex items-end gap-3 rounded-sm border border-emerald-900/30 bg-black/60 p-2 shadow-2xl backdrop-blur-xl transition-all focus-within:border-emerald-500/30 focus-within:bg-black/80 focus-within:shadow-[0_0_30px_rgba(16,185,129,0.1)]">
                         <input
                             type="file"
                             accept="image/*"
@@ -197,7 +218,7 @@ export function ChatArea({ className }: { className?: string }) {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-12 w-12 shrink-0 rounded-full text-neutral-400 hover:bg-white/10 hover:text-white transition-all"
+                            className="h-12 w-12 shrink-0 rounded-sm text-emerald-500/40 hover:bg-emerald-900/20 hover:text-emerald-400 transition-all"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             <ImageIcon className="h-5 w-5" />
@@ -207,10 +228,10 @@ export function ChatArea({ className }: { className?: string }) {
                         <button
                             onClick={handleVoiceInput}
                             className={cn(
-                                "group flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-all",
+                                "group flex h-12 w-12 shrink-0 items-center justify-center rounded-sm transition-all",
                                 isListening
-                                    ? "bg-red-500/20 text-red-500 animate-pulse"
-                                    : "text-neutral-400 hover:bg-white/10 hover:text-white"
+                                    ? "bg-red-900/20 text-red-500 animate-pulse border border-red-500/30"
+                                    : "text-emerald-500/40 hover:bg-emerald-900/20 hover:text-emerald-400"
                             )}
                             title={isListening ? "Stop Listening" : "Voice Input"}
                         >
@@ -218,8 +239,8 @@ export function ChatArea({ className }: { className?: string }) {
                         </button>
 
                         <textarea
-                            className="flex-1 resize-none bg-transparent py-3.5 text-base font-light text-white outline-none placeholder:text-neutral-500"
-                            placeholder="Ask anything..."
+                            className="flex-1 resize-none bg-transparent py-3.5 text-sm font-mono text-emerald-100 outline-none placeholder:text-emerald-900/60"
+                            placeholder="Inquire deeply..."
                             rows={1}
                             style={{ minHeight: "48px", maxHeight: "200px" }}
                             value={input}
@@ -230,20 +251,20 @@ export function ChatArea({ className }: { className?: string }) {
                         <Button
                             size="icon"
                             className={cn(
-                                "h-12 w-12 shrink-0 rounded-full transition-all duration-300",
+                                "h-12 w-12 shrink-0 rounded-sm transition-all duration-300",
                                 input.trim() || selectedImage
-                                    ? "bg-white text-black hover:bg-white/90 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                                    : "bg-neutral-800 text-neutral-500 hover:bg-neutral-700"
+                                    ? "bg-emerald-900/40 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-900/60 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                                    : "bg-transparent text-emerald-900/20"
                             )}
                             onClick={handleSubmit}
                             disabled={isLoading || (!input.trim() && !selectedImage)}
                         >
-                            <Send className="h-5 w-5 ml-0.5" />
+                            <Send className="h-4 w-4" />
                             <span className="sr-only">Send message</span>
                         </Button>
                     </div>
-                    <div className="mt-4 text-center text-[10px] font-medium uppercase tracking-widest text-neutral-600">
-                        AI Tutor • Powered by Gemini
+                    <div className="mt-4 text-center text-[10px] font-mono uppercase tracking-[0.3em] text-emerald-900/40">
+                        AI can make mistakes. Verify important information.
                     </div>
                 </div>
             </div>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap');
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
 
@@ -27,103 +28,159 @@
 }
 
 :root {
-  /* Ultra-Minimal Monochrome Theme */
+  /* Emerald / Bioluminescent Theme */
+  --depth-black: #000000;
+  --biolum-green: #1a5c4a;
+  --abyss-green: #0d1f1c;
+
   --background: #000000;
-  /* Deep Black */
-  --foreground: #ffffff;
-  /* Pure White */
+  --foreground: #e5e5e5;
 
-  --card: #0a0a0a;
-  /* Almost Black */
-  --card-foreground: #ffffff;
+  --card: #050c0c;
+  --card-foreground: #e5e5e5;
 
-  --popover: #0a0a0a;
-  --popover-foreground: #ffffff;
+  --popover: #050c0c;
+  --popover-foreground: #e5e5e5;
 
-  --primary: #ffffff;
-  /* White for primary actions */
+  --primary: #10b981;
+  /* Emerald 500 */
   --primary-foreground: #000000;
 
-  --secondary: #171717;
-  /* Neutral 900 */
-  --secondary-foreground: #ffffff;
+  --secondary: #0d1f1c;
+  --secondary-foreground: #10b981;
 
-  --muted: #262626;
-  /* Neutral 800 */
-  --muted-foreground: #a3a3a3;
-  /* Neutral 400 */
+  --muted: #0d1f1c;
+  --muted-foreground: #1a5c4a;
 
-  --accent: #404040;
-  /* Neutral 700 */
-  --accent-foreground: #ffffff;
+  --accent: #1a5c4a;
+  --accent-foreground: #e5e5e5;
 
   --destructive: #7f1d1d;
-  /* Dark Red (Subtle) */
   --destructive-foreground: #ffffff;
 
-  --border: #262626;
-  --input: #262626;
-  --ring: #ffffff;
+  --border: #1a5c4a;
+  --input: #0d1f1c;
+  --ring: #10b981;
 
   --radius: 1rem;
-  /* 16px for elegant curves */
-}
-
-/* Light mode override (if needed, but design is dark-focused) */
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #ffffff;
-    --foreground: #000000;
-
-    --card: #f5f5f5;
-    --card-foreground: #000000;
-
-    --popover: #ffffff;
-    --popover-foreground: #000000;
-
-    --primary: #000000;
-    --primary-foreground: #ffffff;
-
-    --secondary: #e5e5e5;
-    --secondary-foreground: #000000;
-
-    --muted: #f5f5f5;
-    --muted-foreground: #737373;
-
-    --accent: #d4d4d4;
-    --accent-foreground: #000000;
-
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-
-    --border: #e5e5e5;
-    --input: #e5e5e5;
-    --ring: #000000;
-  }
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Font Family Utilities */
+.font-garamond {
+  font-family: 'EB Garamond', serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.font-sans {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Smooth reveal animations */
+@keyframes drift {
+  0% {
+    transform: translateY(0px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(-20px);
+    opacity: 1;
+  }
+}
+
+.animate-drift {
+  animation: drift 2s ease-out forwards;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-1000 {
+  animation-delay: 1000ms;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 3px;
+  background: #1a5c4a;
+  border-radius: 2px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+/* Glow effects */
+.biolum-text {
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.biolum-box {
+  box-shadow: 0 0 40px -10px rgba(6, 78, 59, 0.2);
+  transition: box-shadow 0.5s ease;
+}
+
+.biolum-box:hover {
+  box-shadow: 0 0 60px -5px rgba(16, 185, 129, 0.3);
+}
+
+/* Code Syntax Highlighting specific to theme */
+.syntax-pink {
+  color: #d946ef;
+}
+
+.syntax-cyan {
+  color: #2dd4bf;
+}
+
+.syntax-green {
+  color: #34d399;
+}
+
+.syntax-yellow {
+  color: #facc15;
+}
+
+.syntax-blue {
+  color: #60a5fa;
+}
+
+.syntax-gray {
+  color: #6b7280;
+}
+
+/* Smooth fade for images */
+.image-mask {
+  mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+}
+
+/* Custom Inputs */
+input:focus {
+  outline: none;
+}
+
+/* Selection */
+::selection {
+  background: #10b981;
+  color: #000;
 }
