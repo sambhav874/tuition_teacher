@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus, MessageSquare, Trash2, Settings, X } from "lucide-react";
+import { Plus, MessageSquare, Trash2, Settings, X, Mic, BookOpen, PenTool } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { useEffect, useState } from "react";
@@ -54,7 +54,7 @@ export function Sidebar({ className, isOpen = false, onClose }: SidebarProps) {
                 </div>
 
                 {/* New Session Button */}
-                <div className="px-4 mb-6">
+                <div className="px-4 mb-6 space-y-2">
                     <button
                         onClick={() => createSession()}
                         className="group relative flex w-full items-center justify-center gap-2 rounded-sm bg-emerald-900/20 border border-emerald-500/30 py-3 text-xs font-mono uppercase tracking-widest text-emerald-400 transition-all hover:bg-emerald-900/40 hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] active:scale-[0.98]"
@@ -62,6 +62,31 @@ export function Sidebar({ className, isOpen = false, onClose }: SidebarProps) {
                         <Plus className="h-4 w-4" />
                         <span>New Session</span>
                     </button>
+
+                    <a
+                        href="/english-tutor"
+                        className="group relative flex w-full items-center justify-center gap-2 rounded-sm bg-blue-900/20 border border-blue-500/30 py-3 text-xs font-mono uppercase tracking-widest text-blue-400 transition-all hover:bg-blue-900/40 hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] active:scale-[0.98]"
+                    >
+                        <Mic className="h-4 w-4" />
+                        <span>English Tutor</span>
+                    </a>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <a
+                            href="/mock-tests"
+                            className="group relative flex w-full items-center justify-center gap-2 rounded-sm bg-purple-900/20 border border-purple-500/30 py-3 text-xs font-mono uppercase tracking-widest text-purple-400 transition-all hover:bg-purple-900/40 hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)] active:scale-[0.98]"
+                        >
+                            <PenTool className="h-4 w-4" />
+                            <span>Mock Tests</span>
+                        </a>
+                        <a
+                            href="/notes"
+                            className="group relative flex w-full items-center justify-center gap-2 rounded-sm bg-amber-900/20 border border-amber-500/30 py-3 text-xs font-mono uppercase tracking-widest text-amber-400 transition-all hover:bg-amber-900/40 hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)] active:scale-[0.98]"
+                        >
+                            <BookOpen className="h-4 w-4" />
+                            <span>Notes</span>
+                        </a>
+                    </div>
                 </div>
 
                 {/* History List */}

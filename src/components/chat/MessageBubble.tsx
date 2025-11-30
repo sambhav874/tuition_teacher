@@ -227,6 +227,104 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                                 ))}
                             </div>
                         </div>
+                    )}
+
+                    {/* References */}
+                    {message.metadata?.references && message.metadata.references.length > 0 && (
+                        <div className="mt-4 overflow-hidden rounded-sm border border-emerald-900/30 bg-black/40 p-5 shadow-lg backdrop-blur-sm">
+                            <div className="mb-4 flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-emerald-500/60">
+                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/20">
+                                    <ExternalLink className="h-3 w-3 text-emerald-400" />
+                                </div>
+                                <span>References</span>
+                            </div>
+                            <ul className="space-y-2">
+                                {message.metadata.references.map((ref, i) => (
+                                    <li key={i}>
+                                        <a
+                                            href={ref.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-start gap-2 text-sm text-emerald-200/70 hover:text-emerald-100 transition-colors group"
+                                        >
+                                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500/50 group-hover:bg-emerald-400" />
+                                            <span className="font-garamond italic underline decoration-emerald-500/30 underline-offset-4 group-hover:decoration-emerald-400/50">
+                                                {ref.title || ref.url}
+                                            </span>
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Flashcards */}
+                    {message.metadata?.flashcards && message.metadata.flashcards.length > 0 && (
+                        <div className="mt-4 overflow-hidden rounded-sm border border-emerald-900/30 bg-black/40 p-5 shadow-lg backdrop-blur-sm">
+                            <div className="mb-4 flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-emerald-500/60">
+                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/20">
+                                    <Lightbulb className="h-3 w-3 text-emerald-400" />
+                                </div>
+                                <span>Flashcards</span>
+                            </div>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {message.metadata.flashcards.map((card, i) => (
+                                    <div key={i} className="group relative h-40 perspective-1000">
+                                        <div className="relative h-full w-full transition-all duration-500 transform-style-3d group-hover:rotate-y-180">
+                                            {/* Front */}
+                                            <div className="absolute inset-0 flex items-center justify-center rounded-sm border border-emerald-900/30 bg-emerald-950/20 p-4 text-center backface-hidden">
+                                                <p className="font-garamond text-lg font-medium text-emerald-100">{card.front}</p>
+                                            </div>
+                                            {/* Back */}
+                                            <div className="absolute inset-0 flex items-center justify-center rounded-sm border border-emerald-500/30 bg-emerald-900/40 p-4 text-center rotate-y-180 backface-hidden">
+                                                <p className="text-sm text-emerald-200">{card.back}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Mock Test */}
+                    {message.metadata?.mockTest && message.metadata.mockTest.length > 0 && (
+                        <div className="mt-4 overflow-hidden rounded-sm border border-emerald-900/30 bg-black/40 p-5 shadow-lg backdrop-blur-sm">
+                            <div className="mb-4 flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-emerald-500/60">
+                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/20">
+                                    <PenTool className="h-3 w-3 text-emerald-400" />
+                                </div>
+                                <span>Mock Test</span>
+                            </div>
+                            <div className="space-y-8">
+                                {message.metadata.mockTest.map((quiz, qIndex) => (
+                                    <div key={qIndex} className="space-y-3">
+                                        <p className="font-medium text-emerald-100 font-garamond text-base">
+                                            <span className="text-emerald-500/50 mr-2">{qIndex + 1}.</span>
+                                            {quiz.question}
+                                        </p>
+                                        <div className="grid gap-2 pl-6">
+                                            {quiz.options.map((option, oIndex) => (
+                                                <button
+                                                    key={oIndex}
+                                                    onClick={(e) => {
+                                                        const isCorrect = option === quiz.answer;
+                                                        const btn = e.currentTarget;
+                                                        if (isCorrect) {
+                                                            btn.classList.add("bg-emerald-500/20", "border-emerald-500");
+                                                        } else {
+                                                            btn.classList.add("bg-red-900/20", "border-red-500/50");
+                                                        }
+                                                    }}
+                                                    className="w-full rounded-sm border border-emerald-900/30 bg-emerald-950/10 px-4 py-2 text-left text-sm text-emerald-200/70 hover:bg-emerald-900/30 transition-all font-mono"
+                                                >
+                                                    {option}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}    {/* Text-to-Speech Control */}
                     <div className="mt-2 flex justify-end items-center gap-2">
                         <div className="flex rounded-full bg-emerald-900/20 border border-emerald-500/10 p-0.5">

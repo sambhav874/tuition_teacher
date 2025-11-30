@@ -1,25 +1,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Send, Image as ImageIcon, Paperclip, Loader2, Sparkles, Mic, Menu, Volume2, VolumeX } from "lucide-react";
+import { Send, BookOpen, Image as ImageIcon, Loader2, Download } from "lucide-react";
 import { cn, compressImage } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { generateAIResponse } from "@/lib/ai-service";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { useState, useRef, useEffect } from "react";
 
-interface ChatAreaProps {
+interface NotesAreaProps {
     className?: string;
     onOpenSidebar?: () => void;
 }
 
-export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
+export function NotesArea({ className, onOpenSidebar }: NotesAreaProps) {
     const { sessions, currentSessionId, createSession, addMessage } = useStore();
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Get current session
     const currentSession = sessions.find((s) => s.id === currentSessionId);
@@ -29,102 +29,45 @@ export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [currentSession?.messages, isLoading]);
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const compressed = await compressImage(reader.result as string);
-                setSelectedImage(compressed);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const [isListening, setIsListening] = useState(false);
-    const recognitionRef = useRef<any>(null);
-    const [isSpokenMode, setIsSpokenMode] = useState(false);
-
-    // Speech Synthesis
+    // Start new session on mount
     useEffect(() => {
-        if (!isSpokenMode) {
-            window.speechSynthesis.cancel();
+        createSession();
+    }, []);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const compressed = await compressImage(file);
+            setSelectedImage(compressed);
+        } catch (error) {
+            console.error("Image upload failed", error);
+            alert("Failed to process image");
         }
-    }, [isSpokenMode]);
-
-    const speakText = (text: string) => {
-        if (!isSpokenMode) return;
-
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        // Try to find a good voice
-        const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
-        if (preferredVoice) utterance.voice = preferredVoice;
-
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-        window.speechSynthesis.speak(utterance);
     };
 
-    const handleVoiceInput = () => {
-        if (!('webkitSpeechRecognition' in window)) {
-            alert("Voice input is not supported in this browser.");
-            return;
-        }
+    const handleExport = () => {
+        if (!currentSession) return;
 
-        if (isListening) {
-            recognitionRef.current?.stop();
-            setIsListening(false);
-            return;
-        }
+        const content = currentSession.messages.map(m => {
+            const role = m.role === 'user' ? 'User' : 'AI';
+            return `[${role}]:\n${m.content}\n\n`;
+        }).join('---\n\n');
 
-        // Stop speaking when user starts listening
-        window.speechSynthesis.cancel();
-
-        const recognition = new (window as any).webkitSpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        recognitionRef.current = recognition;
-
-        recognition.start();
-
-        recognition.onstart = () => {
-            setIsListening(true);
-        };
-
-        recognition.onresult = (event: any) => {
-            const transcript = event.results[0][0].transcript;
-            setInput((prev) => prev + (prev ? " " : "") + transcript);
-            setIsListening(false);
-
-            // Auto-submit in spoken mode if desired, but let's keep it manual for now or maybe auto-submit?
-            // User requested "Student can speak -> AI understands". Usually implies auto-submit.
-            // Let's stick to manual send for safety, or maybe auto-submit if it's a perfect match?
-            // For now, just fill input.
-        };
-
-        recognition.onerror = (event: any) => {
-            if (event.error === 'aborted') {
-                setIsListening(false);
-                return;
-            }
-            console.error("Speech recognition error", event.error);
-            setIsListening(false);
-        };
-
-        recognition.onend = () => {
-            setIsListening(false);
-        };
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `notes-${new Date().toISOString().split('T')[0]}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     const handleSubmit = async () => {
         if ((!input.trim() && !selectedImage) || isLoading) return;
-
-        // Stop previous speech
-        window.speechSynthesis.cancel();
 
         let sessionId = currentSessionId;
         if (!sessionId) {
@@ -146,8 +89,8 @@ export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
         setIsLoading(true);
 
         try {
-            // Generate AI Response
-            const response = await generateAIResponse(userMessageContent, attachments);
+            // Generate AI Response with 'notes' mode
+            const response = await generateAIResponse(userMessageContent, attachments, { mode: 'notes' });
 
             if (response.content) {
                 addMessage(sessionId!, {
@@ -155,8 +98,6 @@ export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
                     content: response.content,
                     metadata: response.metadata,
                 });
-                // Speak the response
-                speakText(response.content);
             }
         } catch (error) {
             console.error("Failed to generate response", error);
@@ -180,21 +121,21 @@ export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
                     onClick={onOpenSidebar}
                     className="text-emerald-500/60 hover:text-emerald-400 transition-colors"
                 >
-                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Menu</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg>
                 </button>
                 <div className="text-[10px] tracking-[0.2em] font-mono text-emerald-500/40 uppercase">
-                    Tuition Teacher
+                    Notes Generator
                 </div>
                 <button
-                    onClick={() => setIsSpokenMode(!isSpokenMode)}
-                    className={cn(
-                        "text-emerald-500/60 hover:text-emerald-400 transition-colors",
-                        isSpokenMode && "text-emerald-400"
-                    )}
+                    onClick={handleExport}
+                    className="text-emerald-500/60 hover:text-emerald-400 transition-colors"
+                    title="Export Notes"
                 >
-                    {isSpokenMode ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+                    <Download className="h-5 w-5" />
                 </button>
             </div>
+
             {/* Messages Area */}
             <div className="flex-1 overflow-auto p-4 sm:p-8">
                 <div className="mx-auto max-w-3xl space-y-8">
@@ -202,16 +143,15 @@ export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
                         /* Welcome Message */
                         <div className="flex flex-col items-center justify-center space-y-8 py-20 text-center animate-in fade-in duration-700">
                             <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-black/50 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)] biolum-box">
-                                <Sparkles className="h-8 w-8 text-emerald-400" />
+                                <BookOpen className="h-8 w-8 text-emerald-400" />
                                 <div className="absolute inset-0 rounded-full bg-emerald-500/5 blur-xl" />
                             </div>
                             <div className="space-y-4">
                                 <h2 className="text-4xl md:text-5xl font-garamond font-light tracking-tight text-emerald-100 biolum-text">
-                                    Greetings, Scholar.
+                                    AI Notes Generator
                                 </h2>
                                 <p className="max-w-md mx-auto text-emerald-500/50 font-mono text-xs tracking-widest uppercase leading-loose">
-                                    I am your guide through the academic abyss. <br />
-                                    Upload a problem or inquire to begin.
+                                    Paste your text or upload an image of your notes. I will summarize it for you.
                                 </p>
                             </div>
                         </div>
@@ -238,52 +178,37 @@ export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
                 <div className="mx-auto max-w-3xl">
                     {/* Image Preview */}
                     {selectedImage && (
-                        <div className="mb-4 relative inline-block animate-in fade-in zoom-in duration-300">
-                            <img src={selectedImage} alt="Preview" className="h-24 w-24 rounded-sm object-cover border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]" />
+                        <div className="mb-4 relative inline-block">
+                            <img src={selectedImage} alt="Preview" className="h-20 w-20 object-cover rounded-sm border border-emerald-500/30" />
                             <button
                                 onClick={() => setSelectedImage(null)}
-                                className="absolute -top-2 -right-2 bg-black text-emerald-500 rounded-full p-1.5 shadow-md border border-emerald-500/30 hover:bg-emerald-900/40 transition-colors"
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                             >
-                                <span className="sr-only">Remove</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
                     )}
 
                     <div className="relative flex items-end gap-3 rounded-sm border border-emerald-900/30 bg-black/60 p-2 shadow-2xl backdrop-blur-xl transition-all focus-within:border-emerald-500/30 focus-within:bg-black/80 focus-within:shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+
                         <input
                             type="file"
                             accept="image/*"
                             className="hidden"
                             ref={fileInputRef}
-                            onChange={handleFileSelect}
+                            onChange={handleImageUpload}
                         />
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-12 w-12 shrink-0 rounded-sm text-emerald-500/40 hover:bg-emerald-900/20 hover:text-emerald-400 transition-all"
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <ImageIcon className="h-5 w-5" />
-                            <span className="sr-only">Attach image</span>
-                        </Button>
-
                         <button
-                            onClick={handleVoiceInput}
-                            className={cn(
-                                "group flex h-12 w-12 shrink-0 items-center justify-center rounded-sm transition-all",
-                                isListening
-                                    ? "bg-red-900/20 text-red-500 animate-pulse border border-red-500/30"
-                                    : "text-emerald-500/40 hover:bg-emerald-900/20 hover:text-emerald-400"
-                            )}
-                            title={isListening ? "Stop Listening" : "Voice Input"}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-sm text-emerald-500/40 transition-all hover:bg-emerald-900/20 hover:text-emerald-400"
+                            title="Upload Notes/Board Image"
                         >
-                            <Mic className={cn("h-5 w-5 transition-transform", isListening ? "scale-110" : "group-hover:scale-110")} />
+                            <ImageIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
                         </button>
 
                         <textarea
                             className="flex-1 resize-none bg-transparent py-3.5 text-sm font-mono text-emerald-100 outline-none placeholder:text-emerald-900/60"
-                            placeholder="Inquire deeply..."
+                            placeholder="Paste text or upload image..."
                             rows={1}
                             style={{ minHeight: "48px", maxHeight: "200px" }}
                             value={input}
@@ -299,15 +224,12 @@ export function ChatArea({ className, onOpenSidebar }: ChatAreaProps) {
                                     ? "bg-emerald-900/40 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-900/60 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                                     : "bg-transparent text-emerald-900/20"
                             )}
-                            onClick={handleSubmit}
+                            onClick={() => handleSubmit()}
                             disabled={isLoading || (!input.trim() && !selectedImage)}
                         >
-                            <Send className="h-4 w-4" />
+                            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                             <span className="sr-only">Send message</span>
                         </Button>
-                    </div>
-                    <div className="mt-4 text-center text-[10px] font-mono uppercase tracking-[0.3em] text-emerald-900/40">
-                        AI can make mistakes. Verify important information.
                     </div>
                 </div>
             </div>

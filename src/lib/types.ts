@@ -5,10 +5,20 @@ export interface VideoRef {
     thumbnail: string;
 }
 
+export interface Reference {
+    url: string;
+    title: string;
+}
+
 export interface Quiz {
     question: string;
     options: string[];
     answer: string;
+}
+
+export interface Flashcard {
+    front: string;
+    back: string;
 }
 
 export interface MessageMetadata {
@@ -16,6 +26,9 @@ export interface MessageMetadata {
     illustration?: string;
     videos?: VideoRef[];
     quiz?: Quiz;
+    mockTest?: Quiz[];
+    flashcards?: Flashcard[];
+    references?: Reference[];
 }
 
 export interface Message {

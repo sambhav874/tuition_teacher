@@ -8,7 +8,11 @@ import {
   ChevronDown,
   Award,
   Globe2,
-  ShieldCheck
+  ShieldCheck,
+  MessageSquare,
+  Mic,
+  PenTool,
+  BookOpen
 } from 'lucide-react';
 import { BackgroundEffects } from '@/components/layout/BackgroundEffects';
 
@@ -51,8 +55,8 @@ const TuitionTeacher: React.FC = () => {
           <a href="#subjects" className="text-[8px] sm:text-[10px] font-sans text-emerald-500/40 hover:text-emerald-400 transition-colors tracking-widest uppercase">
             Curriculum
           </a>
-          <a href="#find" className="text-[8px] sm:text-[10px] font-sans text-emerald-500/40 hover:text-emerald-400 transition-colors tracking-widest uppercase">
-            Connect
+          <a href="/chat" className="text-[8px] sm:text-[10px] font-sans text-emerald-500/40 hover:text-emerald-400 transition-colors tracking-widest uppercase">
+            Chat
           </a>
         </div>
       </nav>
@@ -192,56 +196,75 @@ const TuitionTeacher: React.FC = () => {
         </div>
       </section>
 
-      {/* --- Acquisition / Find Teacher --- */}
-      <section id="find" className="relative py-24 md:py-40 px-6 z-10 bg-gradient-to-t from-[#020606] to-black">
-        <div className="max-w-xl mx-auto text-center space-y-8 md:space-y-12">
-          <div>
-            <h2 className="font-garamond text-3xl sm:text-4xl md:text-5xl text-emerald-50 mb-4 md:mb-6 font-light">
-              Begin the Ascent
-            </h2>
-            <p className="font-sans text-[10px] sm:text-xs md:text-sm text-emerald-500/50 tracking-wide">
-              FILTER BY SUBJECT &bull; LEVEL &bull; LOCATION
-            </p>
+      {/* --- AI Learning Tools --- */}
+      <section id="tools" className="relative w-full py-24 px-6 z-10 bg-[#020404]">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16 text-center">
+            <h2 className="font-garamond text-3xl sm:text-4xl md:text-5xl text-emerald-100/90 italic">AI Learning Tools</h2>
+            <p className="font-mono text-[10px] sm:text-xs text-emerald-600/50 mt-2 uppercase tracking-widest">Powered by Gemini 2.0 Flash</p>
           </div>
 
-          <form className="space-y-4">
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-emerald-500/40" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* AI Tutor */}
+            <a href="/chat" className="group relative p-8 rounded-sm bg-[#050a09] border border-emerald-900/30 hover:border-emerald-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                <div className="p-4 rounded-full bg-emerald-900/20 text-emerald-400 group-hover:scale-110 transition-transform duration-500">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <h3 className="font-garamond text-xl text-emerald-100">AI Tutor</h3>
+                <p className="font-mono text-[10px] text-emerald-500/50 leading-relaxed">
+                  24/7 Homework help & concept explanation.
+                </p>
               </div>
-              <input type="text" placeholder="What do you wish to master?"
-                className="w-full bg-[#050a09] border border-emerald-900/30 text-emerald-100 placeholder-emerald-800/50 text-sm rounded-sm py-4 pl-12 pr-4 focus:border-emerald-500/50 focus:bg-[#081210] transition-all font-mono" />
-            </div>
+            </a>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button type="button" className="group relative px-6 py-4 rounded-sm bg-[#050a09] border border-emerald-900/30 hover:border-emerald-500/30 transition-all text-left">
-                <span className="block text-[10px] text-emerald-600 uppercase tracking-widest mb-1">Level</span>
-                <span className="font-sans text-emerald-200 text-sm group-hover:text-white transition-colors">University</span>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-800 group-hover:text-emerald-500 transition-colors" />
-              </button>
+            {/* English Tutor */}
+            <a href="/english-tutor" className="group relative p-8 rounded-sm bg-[#050a09] border border-emerald-900/30 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                <div className="p-4 rounded-full bg-blue-900/20 text-blue-400 group-hover:scale-110 transition-transform duration-500">
+                  <Mic className="w-6 h-6" />
+                </div>
+                <h3 className="font-garamond text-xl text-emerald-100">English Tutor</h3>
+                <p className="font-mono text-[10px] text-emerald-500/50 leading-relaxed">
+                  Master pronunciation & grammar with voice.
+                </p>
+              </div>
+            </a>
 
-              <button type="button" className="group relative px-6 py-4 rounded-sm bg-[#050a09] border border-emerald-900/30 hover:border-emerald-500/30 transition-all text-left">
-                <span className="block text-[10px] text-emerald-600 uppercase tracking-widest mb-1">Mode</span>
-                <span className="font-sans text-emerald-200 text-sm group-hover:text-white transition-colors">Online / Remote</span>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-800 group-hover:text-emerald-500 transition-colors" />
-              </button>
-            </div>
+            {/* Mock Tests */}
+            <a href="/mock-tests" className="group relative p-8 rounded-sm bg-[#050a09] border border-emerald-900/30 hover:border-purple-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                <div className="p-4 rounded-full bg-purple-900/20 text-purple-400 group-hover:scale-110 transition-transform duration-500">
+                  <PenTool className="w-6 h-6" />
+                </div>
+                <h3 className="font-garamond text-xl text-emerald-100">Mock Tests</h3>
+                <p className="font-mono text-[10px] text-emerald-500/50 leading-relaxed">
+                  Generate & take exams on any topic.
+                </p>
+              </div>
+            </a>
 
-            <button className="w-full group relative px-8 py-4 mt-8 bg-emerald-900/20 border border-emerald-500/30 hover:bg-emerald-900/40 hover:border-emerald-500/60 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-emerald-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-              <span className="relative font-mono text-xs tracking-[0.2em] text-emerald-400 group-hover:text-emerald-200 uppercase">
-                Initialize Search
-              </span>
-            </button>
-          </form>
-
-          <div className="pt-12 flex justify-center gap-8 opacity-40 hover:opacity-100 transition-opacity duration-500">
-            <Award className="w-5 h-5 text-emerald-500" />
-            <Globe2 className="w-5 h-5 text-emerald-500" />
-            <ShieldCheck className="w-5 h-5 text-emerald-500" />
+            {/* Notes Generator */}
+            <a href="/notes" className="group relative p-8 rounded-sm bg-[#050a09] border border-emerald-900/30 hover:border-amber-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                <div className="p-4 rounded-full bg-amber-900/20 text-amber-400 group-hover:scale-110 transition-transform duration-500">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <h3 className="font-garamond text-xl text-emerald-100">Notes Generator</h3>
+                <p className="font-mono text-[10px] text-emerald-500/50 leading-relaxed">
+                  Summarize text & create flashcards.
+                </p>
+              </div>
+            </a>
           </div>
         </div>
       </section>
+
+
 
       {/* --- Footer --- */}
       <footer className="relative py-24 px-6 text-center z-10 border-t border-emerald-900/10 bg-[#000202]">

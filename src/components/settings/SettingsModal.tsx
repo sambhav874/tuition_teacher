@@ -61,6 +61,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             <option value="College" className="bg-neutral-900">College</option>
                         </select>
                     </div>
+
+
                 </div>
 
                 <div className="mt-8 flex justify-end gap-3">
