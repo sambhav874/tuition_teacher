@@ -171,7 +171,7 @@ You are an expert Study Assistant.
         }
 
         const result = await ai.models.generateContent({
-            model: "gemini-2.0-flash-exp",
+            model: process.env.NEXT_PUBLIC_GEMINI_MODEL || "gemini-2.5-flash-exp",
             contents: parts,
             config: {
                 tools: [{ googleSearch: {} }],
