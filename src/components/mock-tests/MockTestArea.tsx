@@ -39,7 +39,14 @@ export function MockTestArea({ className, onOpenSidebar }: MockTestAreaProps) {
         if (!file) return;
 
         try {
-            const compressed = await compressImage(file);
+            const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+
+            const compressed = await compressImage(base64);
             setSelectedImage(compressed);
         } catch (error) {
             console.error("Image upload failed", error);
