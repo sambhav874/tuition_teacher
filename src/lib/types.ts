@@ -29,6 +29,10 @@ export interface MessageMetadata {
     mockTest?: Quiz[];
     flashcards?: Flashcard[];
     references?: Reference[];
+    type?: 'notes' | 'mock-test' | 'standard';
+    topic?: string;
+    summary?: string;
+    data?: any;
 }
 
 export interface Message {

@@ -59,7 +59,25 @@ export function MockTestArea({ className, onOpenSidebar }: MockTestAreaProps) {
 
         const content = currentSession.messages.map(m => {
             const role = m.role === 'user' ? 'User' : 'AI';
-            return `[${role}]:\n${m.content}\n\n`;
+            let text = `[${role}]:\n${m.content}\n`;
+
+            // Append questions for Mock Test
+            if (m.role === 'agent' && m.metadata?.data?.questions) {
+                text += "\n--- QUESTIONS ---\n";
+                m.metadata.data.questions.forEach((q: any, i: number) => {
+                    text += `\nQ${i + 1}. ${q.question} (${q.marks} Marks)\n`;
+                    if (q.type === 'objective' && q.options) {
+                        q.options.forEach((opt: string, j: number) => {
+                            text += `   ${String.fromCharCode(65 + j)}. ${opt}\n`;
+                        });
+                        text += `   Answer: ${q.answer}\n`;
+                    } else {
+                        text += `   Solution: ${q.solution}\n`;
+                    }
+                });
+            }
+
+            return text + "\n";
         }).join('---\n\n');
 
         const blob = new Blob([content], { type: 'text/plain' });
@@ -145,7 +163,7 @@ export function MockTestArea({ className, onOpenSidebar }: MockTestAreaProps) {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-auto p-4 sm:p-8">
-                <div className="mx-auto max-w-3xl space-y-8">
+                <div className="mx-auto max-w-5xl space-y-8">
                     {!currentSession || currentSession.messages.length === 0 ? (
                         /* Welcome Message */
                         <div className="flex flex-col items-center justify-center space-y-8 py-20 text-center animate-in fade-in duration-700">
@@ -182,7 +200,7 @@ export function MockTestArea({ className, onOpenSidebar }: MockTestAreaProps) {
 
             {/* Input Area */}
             <div className="p-4 sm:p-6 pb-6 sm:pb-8">
-                <div className="mx-auto max-w-3xl">
+                <div className="mx-auto max-w-5xl">
                     {/* Image Preview */}
                     {selectedImage && (
                         <div className="mb-4 relative inline-block">

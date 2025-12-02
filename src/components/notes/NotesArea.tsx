@@ -57,16 +57,50 @@ export function NotesArea({ className, onOpenSidebar }: NotesAreaProps) {
     const handleExport = () => {
         if (!currentSession) return;
 
-        const content = currentSession.messages.map(m => {
-            const role = m.role === 'user' ? 'User' : 'AI';
-            return `[${role}]:\n${m.content}\n\n`;
-        }).join('---\n\n');
+        let filename = `notes-${new Date().toISOString().split('T')[0]}`;
+        let hasSetFilename = false;
 
-        const blob = new Blob([content], { type: 'text/plain' });
+        const content = currentSession.messages.map(m => {
+            if (m.role === 'user') {
+                return `## Request: ${m.content}\n`;
+            }
+
+            if (m.role === 'agent') {
+                let text = "";
+
+                // Use metadata if available
+                if (m.metadata?.type === 'notes') {
+                    if (m.metadata.topic) {
+                        text += `# ${m.metadata.topic}\n\n`;
+                        if (!hasSetFilename) {
+                            filename = m.metadata.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                            hasSetFilename = true;
+                        }
+                    }
+                    if (m.metadata.summary) {
+                        text += `**Summary**: ${m.metadata.summary}\n\n`;
+                    }
+                }
+
+                text += `${m.content}\n`;
+
+                // Append Flashcards
+                if (m.metadata?.flashcards) {
+                    text += "\n### Flashcards\n";
+                    m.metadata.flashcards.forEach((card: any, i: number) => {
+                        text += `\n**${i + 1}. ${card.front}**\n${card.back}\n`;
+                    });
+                }
+                return text;
+            }
+            return "";
+        }).join('\n---\n\n');
+
+        const blob = new Blob([content], { type: 'text/markdown' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `notes-${new Date().toISOString().split('T')[0]}.md`;
+        a.download = `${filename}.md`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -99,6 +133,7 @@ export function NotesArea({ className, onOpenSidebar }: NotesAreaProps) {
             // Generate AI Response with 'notes' mode
             const response = await generateAIResponse(userMessageContent, attachments, { mode: 'notes' });
 
+            console.log(response);
             if (response.content) {
                 addMessage(sessionId!, {
                     role: "agent",
@@ -145,7 +180,7 @@ export function NotesArea({ className, onOpenSidebar }: NotesAreaProps) {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-auto p-4 sm:p-8">
-                <div className="mx-auto max-w-3xl space-y-8">
+                <div className="mx-auto max-w-5xl space-y-8">
                     {!currentSession || currentSession.messages.length === 0 ? (
                         /* Welcome Message */
                         <div className="flex flex-col items-center justify-center space-y-8 py-20 text-center animate-in fade-in duration-700">
@@ -182,7 +217,7 @@ export function NotesArea({ className, onOpenSidebar }: NotesAreaProps) {
 
             {/* Input Area */}
             <div className="p-4 sm:p-6 pb-6 sm:pb-8">
-                <div className="mx-auto max-w-3xl">
+                <div className="mx-auto max-w-5xl">
                     {/* Image Preview */}
                     {selectedImage && (
                         <div className="mb-4 relative inline-block">

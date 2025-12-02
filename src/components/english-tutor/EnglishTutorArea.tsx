@@ -135,7 +135,7 @@ export function EnglishTutorArea({ className, onOpenSidebar }: EnglishTutorAreaP
 
             {/* Messages Area */}
             <div className="flex-1 overflow-auto p-4 sm:p-8">
-                <div className="mx-auto max-w-3xl space-y-8">
+                <div className="mx-auto max-w-5xl space-y-8">
                     {!currentSession || currentSession.messages.length === 0 ? (
                         /* Welcome Message */
                         <div className="flex flex-col items-center justify-center space-y-8 py-20 text-center animate-in fade-in duration-700">
@@ -172,7 +172,7 @@ export function EnglishTutorArea({ className, onOpenSidebar }: EnglishTutorAreaP
 
             {/* Input Area */}
             <div className="p-4 sm:p-6 pb-6 sm:pb-8">
-                <div className="mx-auto max-w-3xl">
+                <div className="mx-auto max-w-5xl">
                     <div className="relative flex items-end gap-3 rounded-sm border border-emerald-900/30 bg-black/60 p-2 shadow-2xl backdrop-blur-xl transition-all focus-within:border-emerald-500/30 focus-within:bg-black/80 focus-within:shadow-[0_0_30px_rgba(16,185,129,0.1)]">
 
                         <button

@@ -4,10 +4,53 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { PenTool, Lightbulb, PlayCircle, ArrowUpRight, Volume2, ExternalLink } from 'lucide-react';
+import { PenTool, Lightbulb, PlayCircle, ArrowUpRight, Volume2, ExternalLink, Download } from 'lucide-react';
 
 interface MessageBubbleProps {
     message: Message;
+}
+
+function Flashcard({ front, back }: { front: string, back: string }) {
+    const [isFlipped, setIsFlipped] = useState(false);
+
+    return (
+        <div
+            className="group relative h-40 cursor-pointer"
+            onClick={() => setIsFlipped(!isFlipped)}
+            style={{ perspective: "1000px" }}
+        >
+            <div
+                className="relative h-full w-full transition-all duration-500"
+                style={{
+                    transformStyle: "preserve-3d",
+                    transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)"
+                }}
+            >
+                {/* Front */}
+                <div
+                    className="absolute inset-0 flex items-center justify-center rounded-sm border border-emerald-900/30 bg-emerald-950/20 p-4 text-center"
+                    style={{
+                        backfaceVisibility: "hidden",
+                        WebkitBackfaceVisibility: "hidden"
+                    }}
+                >
+                    <p className="font-garamond text-lg font-medium text-emerald-100">{front}</p>
+                    <span className="absolute bottom-2 right-2 text-[10px] text-emerald-500/40 uppercase tracking-widest">Tap to flip</span>
+                </div>
+                {/* Back */}
+                <div
+                    className="absolute inset-0 flex items-center justify-center rounded-sm border border-emerald-500/30 bg-emerald-900/40 p-4 text-center"
+                    style={{
+                        backfaceVisibility: "hidden",
+                        WebkitBackfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)"
+                    }}
+                >
+                    <p className="text-sm text-emerald-200">{back}</p>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
@@ -51,7 +94,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         >
             <div
                 className={cn(
-                    "max-w-[85%] px-6 py-4 text-sm leading-relaxed tracking-wide shadow-sm sm:max-w-[75%]",
+                    "max-w-[85%] px-6 py-4 text-sm leading-relaxed tracking-wide shadow-sm sm:max-w-[90%]",
                     isUser
                         ? "bg-emerald-900/30 border border-emerald-500/20 text-emerald-100 rounded-sm rounded-br-none backdrop-blur-md"
                         : "bg-black/40 backdrop-blur-md border border-emerald-900/30 text-emerald-100/90 rounded-sm rounded-bl-none"
@@ -269,31 +312,37 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                             </div>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 {message.metadata.flashcards.map((card, i) => (
-                                    <div key={i} className="group relative h-40 perspective-1000">
-                                        <div className="relative h-full w-full transition-all duration-500 transform-style-3d group-hover:rotate-y-180">
-                                            {/* Front */}
-                                            <div className="absolute inset-0 flex items-center justify-center rounded-sm border border-emerald-900/30 bg-emerald-950/20 p-4 text-center backface-hidden">
-                                                <p className="font-garamond text-lg font-medium text-emerald-100">{card.front}</p>
-                                            </div>
-                                            {/* Back */}
-                                            <div className="absolute inset-0 flex items-center justify-center rounded-sm border border-emerald-500/30 bg-emerald-900/40 p-4 text-center rotate-y-180 backface-hidden">
-                                                <p className="text-sm text-emerald-200">{card.back}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <Flashcard key={i} front={card.front} back={card.back} />
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {/* Mock Test */}
-                    {message.metadata?.mockTest && message.metadata.mockTest.length > 0 && (
+                    {/* Notes Metadata (Topic & Summary) */}
+                    {message.metadata?.type === 'notes' && (
+                        <div className="mb-4 space-y-4">
+                            {message.metadata.topic && (
+                                <div className="rounded-sm border-l-2 border-emerald-500 bg-emerald-900/20 p-4">
+                                    <h3 className="font-garamond text-xl font-bold text-emerald-100">{message.metadata.topic}</h3>
+                                </div>
+                            )}
+                            {message.metadata.summary && (
+                                <div className="rounded-sm border border-emerald-900/30 bg-black/40 p-4 text-sm text-emerald-200/80 italic font-garamond">
+                                    <span className="font-bold text-emerald-500 not-italic mr-2">Summary:</span>
+                                    {message.metadata.summary}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Mock Test (Legacy) */}
+                    {message.metadata?.mockTest && message.metadata.mockTest.length > 0 && !message.metadata.data?.questions && (
                         <div className="mt-4 overflow-hidden rounded-sm border border-emerald-900/30 bg-black/40 p-5 shadow-lg backdrop-blur-sm">
                             <div className="mb-4 flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-emerald-500/60">
                                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/20">
                                     <PenTool className="h-3 w-3 text-emerald-400" />
                                 </div>
-                                <span>Mock Test</span>
+                                <span >Mock Test</span>
                             </div>
                             <div className="space-y-8">
                                 {message.metadata.mockTest.map((quiz, qIndex) => (
@@ -325,7 +374,80 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                                 ))}
                             </div>
                         </div>
-                    )}    {/* Text-to-Speech Control */}
+                    )}
+
+                    {/* Mock Test (New Schema) */}
+                    {message.metadata?.type === 'mock-test' && message.metadata.data?.questions && (
+                        <div className="mt-4 overflow-hidden rounded-sm border border-emerald-900/30 bg-black/40 p-5 shadow-lg backdrop-blur-sm">
+                            <div className="mb-4 flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-emerald-500/60">
+                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/20">
+                                    <PenTool className="h-3 w-3 text-emerald-400" />
+                                </div>
+                                <span>Mock Test ({message.metadata.data.questions.length} Questions)</span>
+                            </div>
+                            <div className="space-y-8">
+                                {message.metadata.data.questions.map((q: any, qIndex: number) => (
+                                    <div key={qIndex} className="space-y-3 border-b border-emerald-900/20 pb-6 last:border-0">
+                                        <div className="flex justify-between items-start gap-4">
+                                            <p className="font-medium text-emerald-100 font-garamond text-base flex-1">
+                                                <span className="text-emerald-500/50 mr-2">{qIndex + 1}.</span>
+                                                {q.question}
+                                            </p>
+                                            <span className="text-[10px] font-mono text-emerald-500/40 bg-emerald-900/10 px-2 py-1 rounded">
+                                                {q.marks} Marks
+                                            </span>
+                                        </div>
+
+                                        {/* Objective */}
+                                        {q.type === 'objective' && q.options && (
+                                            <div className="grid gap-2 pl-6">
+                                                {q.options.map((option: string, oIndex: number) => (
+                                                    <button
+                                                        key={oIndex}
+                                                        onClick={(e) => {
+                                                            const isCorrect = option === q.answer;
+                                                            const btn = e.currentTarget;
+                                                            // Reset siblings
+                                                            const parent = btn.parentElement;
+                                                            if (parent) {
+                                                                Array.from(parent.children).forEach(child => {
+                                                                    child.classList.remove("bg-emerald-500/20", "border-emerald-500", "bg-red-900/20", "border-red-500/50");
+                                                                });
+                                                            }
+
+                                                            if (isCorrect) {
+                                                                btn.classList.add("bg-emerald-500/20", "border-emerald-500");
+                                                            } else {
+                                                                btn.classList.add("bg-red-900/20", "border-red-500/50");
+                                                            }
+                                                        }}
+                                                        className="w-full rounded-sm border border-emerald-900/30 bg-emerald-950/10 px-4 py-2 text-left text-sm text-emerald-200/70 hover:bg-emerald-900/30 transition-all font-mono"
+                                                    >
+                                                        {option}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Theoretical / Numerical */}
+                                        {(q.type === 'theoretical' || q.type === 'numerical') && (
+                                            <div className="pl-6">
+                                                <details className="group">
+                                                    <summary className="cursor-pointer text-xs font-mono text-emerald-500/60 hover:text-emerald-400 transition-colors list-none flex items-center gap-2">
+                                                        <span>▶ Show Solution</span>
+                                                    </summary>
+                                                    <div className="mt-3 p-4 rounded-sm bg-emerald-900/10 border border-emerald-900/20 text-sm text-emerald-200/80 font-garamond leading-relaxed animate-in fade-in slide-in-from-top-2">
+                                                        <ReactMarkdown>{q.solution || "No solution provided."}</ReactMarkdown>
+                                                    </div>
+                                                </details>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {/* Text-to-Speech Control */}
                     <div className="mt-2 flex justify-end items-center gap-2">
                         <div className="flex rounded-full bg-emerald-900/20 border border-emerald-500/10 p-0.5">
                             <button
@@ -358,6 +480,48 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                         >
                             <Volume2 className="h-3 w-3" />
                             <span>{isSpeaking ? "Stop" : "Listen"}</span>
+                        </button>
+                        <button
+                            onClick={() => {
+                                let text = "";
+                                let filename = `note-${new Date().toISOString().split('T')[0]}`;
+
+                                // Use metadata if available
+                                if (message.metadata?.type === 'notes') {
+                                    if (message.metadata.topic) {
+                                        text += `# ${message.metadata.topic}\n\n`;
+                                        filename = message.metadata.topic.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                                    }
+                                    if (message.metadata.summary) {
+                                        text += `**Summary**: ${message.metadata.summary}\n\n`;
+                                    }
+                                }
+
+                                text += `${message.content}\n`;
+
+                                // Append Flashcards
+                                if (message.metadata?.flashcards) {
+                                    text += "\n### Flashcards\n";
+                                    message.metadata.flashcards.forEach((card: any, i: number) => {
+                                        text += `\n**${i + 1}. ${card.front}**\n${card.back}\n`;
+                                    });
+                                }
+
+                                const blob = new Blob([text], { type: 'text/markdown' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `${filename}.md`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            }}
+                            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider transition-colors font-mono border bg-emerald-900/20 text-emerald-400 border-emerald-500/20 hover:bg-emerald-900/40 hover:text-emerald-200"
+                            title="Export this note"
+                        >
+                            <Download className="h-3 w-3" />
+                            <span>Export</span>
                         </button>
                     </div>
                 </div>
